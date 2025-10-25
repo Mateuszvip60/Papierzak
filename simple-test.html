@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Test modułów ES6</title>
+</head>
+<body>
+    <h1>🧪 Test modułów ES6</h1>
+    <div id="status">🔄 Testowanie...</div>
+    <div id="results"></div>
+
+    <script type="module">
+        const status = document.getElementById('status');
+        const results = document.getElementById('results');
+        
+        async function testModules() {
+            try {
+                status.textContent = '🔄 Testowanie importów...';
+                results.innerHTML = '';
+                
+                // Test 1: Import elements
+                console.log('🧪 Test 1: Import elements.js');
+                const elements = await import('./src/ui/elements.js');
+                console.log('✅ elements.js załadowany:', elements);
+                
+                // Test 2: Check if getElements function exists
+                if (elements.getElements && typeof elements.getElements === 'function') {
+                    console.log('✅ getElements function: ISTNIEJE');
+                    results.innerHTML += '✅ getElements function: ISTNIEJE<br>';
+                } else {
+                    console.log('❌ getElements function: BRAK');
+                    results.innerHTML += '❌ getElements function: BRAK<br>';
+                }
+                
+                // Test 3: Import main.js
+                console.log('🧪 Test 2: Import main.js');
+                const main = await import('./src/main.js');
+                console.log('✅ main.js załadowany:', main);
+                results.innerHTML += '✅ main.js: ZAŁADOWANY<br>';
+                
+                status.textContent = '✅ WSZYSTKIE TESTY PRZESZŁY!';
+                status.style.backgroundColor = '#4CAF50';
+                
+            } catch (error) {
+                console.error('❌ Błąd:', error);
+                status.textContent = '❌ BŁĄD: ' + error.message;
+                status.style.backgroundColor = '#f44336';
+                results.innerHTML = '<pre style="color: red;">' + error.stack + '</pre>';
+            }
+        }
+        
+        testModules();
+    </script>
+</body>
+</html>

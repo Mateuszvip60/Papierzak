@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Test gry Heinz Ketchup Empire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            text-align: center;
+            padding: 50px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .game-frame {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .status {
+            font-size: 18px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success { background: #4CAF50; }
+        .error { background: #f44336; }
+        .loading { background: #ff9800; }
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #1976D2;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Test gry Heinz Ketchup Empire</h1>
+        <div id="status" class="status loading">🔄 Testowanie gry...</div>
+        
+        <button class="btn" onclick="testGame()">🔄 Test ponownie</button>
+        <button class="btn" onclick="window.open('index.html', '_blank')">🎮 Otwórz grę</button>
+        
+        <iframe id="gameFrame" class="game-frame" src="index.html"></iframe>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let testResults = {
+            scriptLoaded: false,
+            domReady: false,
+            errors: []
+        };
+
+        function testGame() {
+            document.getElementById('status').className = 'status loading';
+            document.getElementById('status').textContent = '🔄 Testowanie gry...';
+            document.getElementById('results').innerHTML = '';
+            
+            // Reset test results
+            testResults = {
+                scriptLoaded: false,
+                domReady: false,
+                errors: []
+            };
+
+            // Test 1: Check if main script exists
+            testScriptExists();
+            
+            // Test 2: Check iframe content
+            setTimeout(testIframe, 2000);
+        }
+
+        function testScriptExists() {
+            try {
+                // Create a test to see if the module loads
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.src = 'src/main.js';
+                script.onload = () => {
+                    testResults.scriptLoaded = true;
+                    updateStatus();
+                };
+                script.onerror = (e) => {
+                    testResults.errors.push('Błąd ładowania modułu: ' + e.message);
+                    updateStatus();
+                };
+                document.head.appendChild(script);
+            } catch (e) {
+                testResults.errors.push('Błąd testu script: ' + e.message);
+                updateStatus();
+            }
+        }
+
+        function testIframe() {
+            try {
+                const iframe = document.getElementById('gameFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                
+                if (iframeDoc.readyState === 'complete') {
+                    testResults.domReady = true;
+                } else {
+                    testResults.errors.push('DOM iframe nie jest gotowy');
+                }
+                
+                // Check for console errors
+                iframe.contentWindow.addEventListener('error', function(e) {
+                    testResults.errors.push('Błąd w grze: ' + e.message);
+                    updateStatus();
+                });
+                
+                updateStatus();
+            } catch (e) {
+                testResults.errors.push('Błąd iframe: ' + e.message);
+                updateStatus();
+            }
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            
+            if (testResults.errors.length > 0) {
+                status.className = 'status error';
+                status.textContent = '❌ Znaleziono błędy!';
+                showResults();
+            } else if (testResults.scriptLoaded && testResults.domReady) {
+                status.className = 'status success';
+                status.textContent = '✅ Gra działa poprawnie!';
+                showResults();
+            } else {
+                status.className = 'status loading';
+                status.textContent = '🔄 Testowanie w toku...';
+            }
+        }
+
+        function showResults() {
+            const results = document.getElementById('results');
+            let html = '<h3>📊 Wyniki testu:</h3>';
+            
+            html += '<div>';
+            html += '✅ Skrypt załadowany: ' + (testResults.scriptLoaded ? 'TAK' : 'NIE') + '<br>';
+            html += '✅ DOM gotowy: ' + (testResults.domReady ? 'TAK' : 'NIE') + '<br>';
+            
+            if (testResults.errors.length > 0) {
+                html += '<br>❌ Błędy:<ul>';
+                testResults.errors.forEach(error => {
+                    html += '<li>' + error + '</li>';
+                });
+                html += '</ul>';
+            }
+            
+            html += '</div>';
+            
+            results.innerHTML = html;
+        }
+
+        // Start test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(testGame, 1000);
+        });
+    </script>
+</body>
+</html>
